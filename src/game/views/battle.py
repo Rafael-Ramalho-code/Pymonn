@@ -48,9 +48,18 @@ def battle_resolve_view(request):
         messages.error(request, "Informe pelo menos um número para a batalha.")
         return redirect("game:battle")
 
-    numeros = [int(n) for n in raw_numeros]
-    valor = request.POST.get("valor_aposta")
-    valor_aposta = int(valor) if valor else 0
+    # se vier texto no lugar de número, avisa em vez de dar erro 500
+    try:
+        numeros = [int(n) for n in raw_numeros]
+        valor = request.POST.get("valor_aposta")
+        valor_aposta = int(valor) if valor else 0
+    except ValueError:
+        messages.error(request, "Os números e o valor da aposta precisam ser inteiros.")
+        return redirect("game:battle")
+
+    if valor_aposta < 0:
+        messages.error(request, "O valor da aposta não pode ser negativo.")
+        return redirect("game:battle")
     modo_simulacao = request.POST.get("modo") == "simular"
     policy = PoliticaMultiplicador()
 
